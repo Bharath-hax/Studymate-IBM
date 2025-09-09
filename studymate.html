@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyMatic - AI-Powered PDF Q&A System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .upload-section {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .chat-section {
+            flex: 2;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        h2 {
+            color: #1a2980;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .upload-area {
+            border: 2px dashed #26d0ce;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background: #e8f8f8;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #26d0ce;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .features {
+            margin-top: 25px;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon {
+            background: #e8f8f8;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #1a2980;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 400px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background: #e6eeff;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+        
+        .ai-message {
+            background: #e8f8f8;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+        
+        .message-header {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #1a2980;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .question-input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .question-input:focus {
+            border-color: #26d0ce;
+            box-shadow: 0 0 0 2px rgba(38, 208, 206, 0.2);
+        }
+        
+        .voice-btn {
+            background: #1a2980;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .voice-btn.listening {
+            background: #ff5e5e;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .tech-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .badge {
+            background: #e8f8f8;
+            color: #1a2980;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .references {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e8f8f8;
+            border-radius: 10px;
+        }
+        
+        .references a {
+            color: #1a2980;
+            text-decoration: none;
+        }
+        
+        .references a:hover {
+            text-decoration: underline;
+        }
+        
+        .file-preview {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .file-preview h3 {
+            margin-bottom: 10px;
+            color: #1a2980;
+        }
+        
+        .processing-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .processing-steps {
+            margin: 15px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #666;
+        }
+        
+        .step.active {
+            color: #1a2980;
+            font-weight: 600;
+        }
+        
+        .step.completed {
+            color: #26d0ce;
+        }
+        
+        .step-icon {
+            margin-right: 10px;
+        }
+        
+        .suggested-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .suggestion {
+            background: #e8f8f8;
+            color: #1a2980;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .suggestion:hover {
+            background: #d0f0f0;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h1>StudyMatic</h1>
+            <p>An AI-Powered PDF-Based Q&A System for Students with Enhanced PDF Processing</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2>Upload Study Materials</h2>
+                <div class="upload-area" id="dropZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <p>Drag & drop your PDF files here or click to browse</p>
+                    <input type="file" class="file-input" id="fileInput" accept=".pdf" multiple>
+                </div>
+                
+                <div id="filePreview"></div>
+                
+                <button class="btn" id="processBtn" onclick="processPDFs()">
+                    <i class="fas fa-cogs"></i> Process Documents
+                </button>
+                
+                <div class="processing-bar" id="processingBar" style="display: none;">
+                    <div class="progress" id="progress"></div>
+                </div>
+                
+                <div class="processing-steps" id="processingSteps" style="display: none;">
+                    <div class="step" id="step1">
+                        <span class="step-icon"><i class="fas fa-file-alt"></i></span>
+                        <span>Extracting text from PDF</span>
+                    </div>
+                    <div class="step" id="step2">
+                        <span class="step-icon"><i class="fas fa-code"></i></span>
+                        <span>Chunking content</span>
+                    </div>
+                    <div class="step" id="step3">
+                        <span class="step-icon"><i class="fas fa-database"></i></span>
+                        <span>Creating embeddings</span>
+                    </div>
+                    <div class="step" id="step4">
+                        <span class="step-icon"><i class="fas fa-search"></i></span>
+                        <span>Building FAISS index</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <h2>Key Features</h2>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <p>Conversational Q&A from Academic PDFs</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <p>Accurate Text Extraction and Preprocessing</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <p>Semantic Search Using FAISS and Embeddings</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <p>LLM-Based Answer Generation with IBM Watson</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <p>IBM Granite Speech Integration</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-section">
+                <h2>Ask Questions About Your Documents</h2>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai-message">
+                        <div class="message-header">StudyMatic</div>
+                        <p>Hello! I'm your AI study assistant. Upload your PDF documents and ask me any questions about their content.</p>
+                    </div>
+                </div>
+                
+                <div class="suggested-questions" id="suggestedQuestions">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                
+                <div class="input-area">
+                    <input type="text" class="question-input" id="questionInput" placeholder="Type your question here...">
+                    <button class="voice-btn" id="voiceBtn" title="Voice Input">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button class="btn" id="askBtn" onclick="askQuestion()">
+                        <i class="fas fa-paper-plane"></i> Ask
+                    </button>
+                </div>
+                
+                <div class="tech-badges">
+                    <span class="badge">Python</span>
+                    <span class="badge">Streamlit</span>
+                    <span class="badge">IBM Watson</span>
+                    <span class="badge">HuggingFace</span>
+                    <span class="badge">PyMuPDF</span>
+                    <span class="badge">Mistral</span>
+                    <span class="badge">FAISS</span>
+                    <span class="badge">IBM Granite</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="references">
+            <h2>References</h2>
+            <p>For detailed documentation, visit: <a href="#">StudyMatic Technical Documentation</a></p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const chatMessages = document.getElementById('chatMessages');
+        const questionInput = document.getElementById('questionInput');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const filePreview = document.getElementById('filePreview');
+        const processBtn = document.getElementById('processBtn');
+        const processingBar = document.getElementById('processingBar');
+        const progress = document.getElementById('progress');
+        const processingSteps = document.getElementById('processingSteps');
+        const suggestedQuestions = document.getElementById('suggestedQuestions');
+        const askBtn = document.getElementById('askBtn');
+        
+        // Store uploaded files and document context
+        let uploadedFiles = [];
+        let isProcessing = false;
+        let documentContext = {
+            type: '',
+            topics: [],
+            processed: false,
+            content: {}
+        };
+        
+        // Event Listeners
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.background = '#e8f8f8';
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.background = '';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.background = '';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFiles(fileInput.files);
+            }
+        });
+        
+        // Voice input functionality
+        let isListening = false;
+        voiceBtn.addEventListener('click', toggleVoiceInput);
+        
+        function toggleVoiceInput() {
+            if (isListening) {
+                stopVoiceInput();
+            } else {
+                startVoiceInput();
+            }
+        }
+        
+        function startVoiceInput() {
+            isListening = true;
+            voiceBtn.classList.add('listening');
+            voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            questionInput.placeholder = "Listening... Speak now";
+            
+            // Simulate voice input for demonstration
+            setTimeout(() => {
+                const sampleQuestions = getSampleQuestions();
+                const randomQuestion = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
+                questionInput.value = randomQuestion;
+                stopVoiceInput();
+            }, 2000);
+        }
+        
+        function stopVoiceInput() {
+            isListening = false;
+            voiceBtn.classList.remove('listening');
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            questionInput.placeholder = "Type your question here...";
+        }
+        
+        // Handle file selection
+        function handleFiles(files) {
+            uploadedFiles = [];
+            filePreview.innerHTML = '';
+            documentContext.processed = false;
+            
+            let pdfCount = 0;
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type === 'application/pdf') {
+                    uploadedFiles.push(files[i]);
+                    pdfCount++;
+                    
+                    // Add file to preview
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'file-preview';
+                    fileDiv.innerHTML = `
+                        <h3><i class="fas fa-file-pdf"></i> ${files[i].name}</h3>
+                        <p>Size: ${formatFileSize(files[i].size)}</p>
+                    `;
+                    filePreview.appendChild(fileDiv);
+                    
+                    // Analyze document type based on filename
+                    analyzeDocumentType(files[i].name);
+                }
+            }
+            
+            if (pdfCount > 0) {
+                addMessage(`Uploaded ${pdfCount} PDF file(s). Click "Process Documents" to continue.`, 'ai');
+                processBtn.disabled = false;
+            } else {
+                addMessage('Please upload PDF files only.', 'ai');
+                processBtn.disabled = true;
+            }
+        }
+        
+        // Analyze document type based on filename
+        function analyzeDocumentType(filename) {
+            const lowerName = filename.toLowerCase();
+            
+            if (lowerName.includes('hack') || lowerName.includes('security') || lowerName.includes('cyber')) {
+                documentContext.type = 'ethical hacking';
+                documentContext.topics = ['security', 'vulnerabilities', 'penetration testing', 'cybersecurity'];
+                // Simulate extracted content
+                documentContext.content = {
+                    'ethical hacking': 'Ethical hacking involves authorized attempts to gain unauthorized access to computer systems to identify security vulnerabilities.',
+                    'types of hackers': 'There are three main types of hackers: white hat (ethical), black hat (malicious), and gray hat (in-between).',
+                    'importance': 'Cybersecurity is crucial to protect sensitive data, prevent financial losses, and maintain privacy in the digital age.',
+                    'common techniques': 'Common ethical hacking techniques include penetration testing, vulnerability scanning, social engineering, and network analysis.'
+                };
+            } else if (lowerName.includes('math') || lowerName.includes('calculus') || lowerName.includes('algebra')) {
+                documentContext.type = 'mathematics';
+                documentContext.topics = ['equations', 'formulas', 'calculus', 'algebra'];
+                documentContext.content = {
+                    'calculus': 'Calculus is the mathematical study of continuous change, with two main branches: differential and integral calculus.',
+                    'algebra': 'Algebra is the study of mathematical symbols and the rules for manipulating these symbols.',
+                    'formulas': 'Mathematical formulas express relationships between different variables and are used to solve problems.',
+                    'applications': 'Mathematics has applications in science, engineering, economics, and many other fields.'
+                };
+            } else if (lowerName.includes('science') || lowerName.includes('physics') || lowerName.includes('chemistry')) {
+                documentContext.type = 'science';
+                documentContext.topics = ['experiments', 'theories', 'scientific principles'];
+                documentContext.content = {
+                    'scientific method': 'The scientific method involves making observations, forming hypotheses, conducting experiments, and drawing conclusions.',
+                    'physics': 'Physics is the natural science that studies matter, its motion and behavior through space and time.',
+                    'chemistry': 'Chemistry is the scientific study of the properties and behavior of matter.',
+                    'biology': 'Biology is the natural science that studies life and living organisms.'
+                };
+            } else {
+                documentContext.type = 'general';
+                documentContext.topics = ['main ideas', 'key points', 'summary'];
+                documentContext.content = {
+                    'introduction': 'This document appears to cover important concepts in its field.',
+                    'key points': 'The main ideas presented are valuable for understanding the topic.',
+                    'conclusion': 'The document concludes with important insights and recommendations.'
+                };
+            }
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        // Process PDFs
+        function processPDFs() {
+            if (uploadedFiles.length === 0) {
+                addMessage('Please upload at least one PDF file first.', 'ai');
+                return;
+            }
+            
+            if (isProcessing) {
+                addMessage('Documents are already being processed. Please wait...', 'ai');
+                return;
+            }
+            
+            isProcessing = true;
+            processBtn.disabled = true;
+            processingBar.style.display = 'block';
+            processingSteps.style.display = 'block';
+            
+            // Get file names
+            const fileNames = uploadedFiles.map(file => file.name).join(', ');
+            addMessage(`Processing ${fileNames}...`, 'ai');
+            
+            // Simulate processing with steps
+            simulateProcessing();
+        }
+        
+        // Simulate processing with visual steps
+        function simulateProcessing() {
+            const steps = document.querySelectorAll('.step');
+            const totalSteps = steps.length;
+            let currentStep = 0;
+            
+            const processInterval = setInterval(() => {
+                if (currentStep > 0) {
+                    steps[currentStep - 1].classList.remove('active');
+                    steps[currentStep - 1].classList.add('completed');
+                    steps[currentStep - 1].querySelector('.step-icon').innerHTML = '<i class="fas fa-check"></i>';
+                }
+                
+                if (currentStep < totalSteps) {
+                    steps[currentStep].classList.add('active');
+                    progress.style.width = ((currentStep + 1) * 25) + '%';
+                    currentStep++;
+                } else {
+                    clearInterval(processInterval);
+                    finishProcessing();
+                }
+            }, 1000);
+        }
+        
+        // Finish processing
+        function finishProcessing() {
+            const fileNames = uploadedFiles.map(file => file.name).join(', ');
+            
+            setTimeout(() => {
+                addMessage(`Documents (${fileNames}) processed successfully! I've identified this as ${documentContext.type} content. You can now ask questions about these topics.`, 'ai');
+                isProcessing = false;
+                documentContext.processed = true;
+                
+                // Show suggested questions
+                showSuggestedQuestions();
+            }, 500);
+        }
+        
+        // Show suggested questions based on document type
+        function showSuggestedQuestions() {
+            suggestedQuestions.innerHTML = '';
+            
+            const questions = getSampleQuestions();
+            
+            questions.forEach(question => {
+                const suggestion = document.createElement('div');
+                suggestion.className = 'suggestion';
+                suggestion.textContent = question;
+                suggestion.addEventListener('click', () => {
+                    questionInput.value = question;
+                    askQuestion();
+                });
+                suggestedQuestions.appendChild(suggestion);
+            });
+        }
+        
+        // Get sample questions based on document type
+        function getSampleQuestions() {
+            switch (documentContext.type) {
+                case 'ethical hacking':
+                    return [
+                        "What is ethical hacking?",
+                        "Why is cybersecurity important?",
+                        "Explain types of hackers",
+                        "What are common hacking techniques?"
+                    ];
+                case 'mathematics':
+                    return [
+                        "Explain the main formula in this document",
+                        "What is the practical application of this theory?",
+                        "Summarize the key concepts",
+                        "How to solve the example problems?"
+                    ];
+                case 'science':
+                    return [
+                        "What is the main hypothesis?",
+                        "Explain the methodology",
+                        "What are the research findings?",
+                        "Summarize the conclusion"
+                    ];
+                default:
+                    return [
+                        "What is this document about?",
+                        "Summarize the key points",
+                        "What are the main ideas?",
+                        "Explain the central concept"
+                    ];
+            }
+        }
+        
+        // Ask question
+        function askQuestion() {
+            const question = questionInput.value.trim();
+            if (question === '') return;
+            
+            if (!documentContext.processed) {
+                addMessage('Please upload and process PDF documents first.', 'ai');
+                return;
+            }
+            
+            addMessage(question, 'user');
+            questionInput.value = '';
+            askBtn.disabled = true;
+            
+            // Simulate AI thinking
+            setTimeout(() => {
+                // Generate response based on question and document type
+                const response = generateResponse(question);
+                addMessage(response, 'ai');
+                askBtn.disabled = false;
+            }, 1500);
+        }
+        
+        // Generate response based on question and document type
+        function generateResponse(question) {
+            const lowerQuestion = question.toLowerCase();
+            
+            // Check if we have direct content for this question
+            for (const [key, value] of Object.entries(documentContext.content)) {
+                if (lowerQuestion.includes(key)) {
+                    return value;
+                }
+            }
+            
+            // Generic responses for common question types
+            if (lowerQuestion.includes('what is') || lowerQuestion.includes('define')) {
+                if (documentContext.type === 'ethical hacking') {
+                    return "Based on your PDF, ethical hacking is the practice of testing computer systems for security vulnerabilities. Ethical hackers use their skills to improve security by identifying weaknesses before malicious hackers can exploit them. They follow strict guidelines and work with permission from system owners.";
+                } else {
+                    return `Based on your ${documentContext.type} PDF, this appears to be about ${documentContext.topics[0]}. The document provides detailed information and analysis on this topic.`;
+                }
+            } else if (lowerQuestion.includes('why') || lowerQuestion.includes('important')) {
+                if (documentContext.type === 'ethical hacking') {
+                    return "Cybersecurity is crucial because it protects sensitive data from theft and damage, prevents financial losses, maintains business continuity, and ensures compliance with data protection regulations. Without proper security, organizations are vulnerable to data breaches and operational disruption.";
+                } else {
+                    return `This ${documentContext.type} content is important because it addresses fundamental concepts that are crucial for understanding more advanced topics and practical applications in the field.`;
+                }
+            } else if (lowerQuestion.includes('how') || lowerQuestion.includes('method')) {
+                return `The ${documentContext.type} document describes various methods and approaches. These typically involve systematic processes, specific techniques, and best practices that are standard in the field.`;
+            } else if (lowerQuestion.includes('example') || lowerQuestion.includes('application')) {
+                return `The PDF includes practical examples and applications of the theoretical concepts. These demonstrate how the ideas presented can be implemented in real-world scenarios.`;
+            } else if (lowerQuestion.includes('summary') || lowerQuestion.includes('summarize')) {
+                return `Based on the ${documentContext.type} content in your PDF, the main points are: 1) The document covers ${documentContext.topics.join(', ')}, 2) It provides detailed information about these aspects, 3) The key takeaways would be valuable for understanding this subject better.`;
+            } else {
+                // Try to find the most relevant content
+                for (const topic of documentContext.topics) {
+                    if (lowerQuestion.includes(topic)) {
+                        return documentContext.content[topic] || `The PDF discusses ${topic} in detail. This is an important aspect of ${documentContext.type} that involves specific techniques and considerations.`;
+                    }
+                }
+                
+                return `Based on the ${documentContext.type} content in your PDF, I can provide information about ${documentContext.topics.join(', ')}. Could you please ask a more specific question about these topics?`;
+            }
+        }
+        
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(sender === 'user' ? 'user-message' : 'ai-message');
+            
+            const header = document.createElement('div');
+            header.classList.add('message-header');
+            header.textContent = sender === 'user' ? 'You' : 'StudyMatic';
+            
+            const content = document.createElement('p');
+            content.textContent = text;
+            
+            messageDiv.appendChild(header);
+            messageDiv.appendChild(content);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Allow pressing Enter to submit question
+        questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        });
+        
+        // Initialize with a sample file for demonstration
+        window.onload = function() {
+            // Simulate having a file already uploaded for demo purposes
+            setTimeout(() => {
+                analyzeDocumentType('Ethical-Hacking.pdf');
+                documentContext.processed = true;
+                showSuggestedQuestions();
+                addMessage('Demo mode activated. You can ask questions about ethical hacking.', 'ai');
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
